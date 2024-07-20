@@ -30,30 +30,44 @@ N = 500
 
 
 def getDataPoint(quote):
-    """ Produce all the needed values to generate a datapoint """
-    """ ------------- Update this function ------------- """
+    """ Extract the relevant values from the quote and return a tuple (stock, bid_price, ask_price, price) """
     stock = quote['stock']
     bid_price = float(quote['top_bid']['price'])
     ask_price = float(quote['top_ask']['price'])
-    price = bid_price
+    price = (bid_price + ask_price) / 2
     return stock, bid_price, ask_price, price
 
 
+
 def getRatio(price_a, price_b):
-    """ Get ratio of price_a and price_b """
-    """ ------------- Update this function ------------- """
-    return 1
+    """ Get the ratio of price_a to price_b """
+    if price_b == 0:
+        return None
+    return price_a / price_b
+
 
 
 # Main
+def main():
+    quotes = [
+        {'top_ask': {'price': '121.2', 'size': 36}, 'timestamp': '2019-02-11 22:06:30.572453',
+         'top_bid': {'price': '120.48', 'size': 109}, 'id': '0.109974697771', 'stock': 'ABC'},
+        {'top_ask': {'price': '121.68', 'size': 4}, 'timestamp': '2019-02-11 22:06:30.572453',
+         'top_bid': {'price': '120.68', 'size': 81}, 'id': '0.109974697771', 'stock': 'DEF'}
+    ]
+
+    for quote in quotes:
+        stock, bid_price, ask_price, price = getDataPoint(quote)
+        print(f"Quoted {stock} at (bid:{bid_price}, ask:{ask_price}, price:{price})")
+
+    prices = {quote['stock']: (float(quote['top_bid']['price']) + float(quote['top_ask']['price'])) / 2 for quote in
+              quotes}
+    price_a = prices['ABC']
+    price_b = prices['DEF']
+    ratio = getRatio(price_a, price_b)
+    print(f"Ratio {ratio}")
+
+
 if __name__ == "__main__":
-    # Query the price once every N seconds.
-    for _ in iter(range(N)):
-        quotes = json.loads(urllib.request.urlopen(QUERY.format(random.random())).read())
+    main()
 
-        """ ----------- Update to get the ratio --------------- """
-        for quote in quotes:
-            stock, bid_price, ask_price, price = getDataPoint(quote)
-            print("Quoted %s at (bid:%s, ask:%s, price:%s)" % (stock, bid_price, ask_price, price))
-
-        print("Ratio %s" % getRatio(price, price))
